@@ -64,4 +64,34 @@ public sealed class ProcessForgeTests
         // Assert
         act.Should().Throw<ArgumentException>();
     }
+
+    [Fact]
+    public void ShouldExclude_WhenTargetExecutableMatchesConfiguredRule_ReturnsTrue()
+    {
+        // Arrange
+        var filter = new ProcessExclusionFilter(new ProcessExclusionOptions
+        {
+            ExcludedExactNames = ["language_server.exe"]
+        });
+        var proc = new ProcessMetadata(1234, "language_server", "C:\\bin\\language_server.exe", "", "language_server.exe", "user");
+
+        // Act & Assert
+        filter.ShouldExclude(proc).Should().BeTrue();
+    }
+
+    [Fact]
+    public void ExcludeExactName_WhenTargetExecutableMatchesDynamicRule_ReturnsTrue()
+    {
+        // Arrange
+        var filter = new ProcessExclusionFilter(new ProcessExclusionOptions());
+        var proc = new ProcessMetadata(1234, "node", "C:\\bin\\node.exe", "", "C:\\scripts\\worker.js", "user");
+
+        filter.ShouldExclude(proc).Should().BeFalse();
+
+        // Act
+        filter.ExcludeExactName("worker.js");
+
+        // Assert
+        filter.ShouldExclude(proc).Should().BeTrue();
+    }
 }

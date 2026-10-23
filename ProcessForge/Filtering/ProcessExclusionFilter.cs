@@ -12,9 +12,9 @@ public sealed class ProcessExclusionFilter(ProcessExclusionOptions options)
     private readonly object _syncLock = new();
 
     /// <summary>
-    /// Ajoute dynamiquement un nom exact de processus à exclure au cours de l'exécution.
+    /// Ajoute dynamiquement un nom exact de processus ou de cible exécutable à exclure au cours de l'exécution.
     /// </summary>
-    /// <param name="processName">Nom exact du processus à exclure.</param>
+    /// <param name="processName">Nom exact du processus ou de la cible à exclure.</param>
     public void ExcludeExactName(string processName)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(processName);
@@ -25,7 +25,7 @@ public sealed class ProcessExclusionFilter(ProcessExclusionOptions options)
     }
 
     /// <summary>
-    /// Détermine si un processus répond aux critères d'exclusion.
+    /// Détermine si un processus répond aux critères d'exclusion (par PID, compte système, nom de processus ou exécutable cible).
     /// </summary>
     /// <param name="process">Métadonnées du processus.</param>
     /// <returns>True si le processus doit être exclu, False sinon.</returns>
@@ -43,21 +43,78 @@ public sealed class ProcessExclusionFilter(ProcessExclusionOptions options)
             return true;
         }
 
-        var processName = process.ProcessName;
-        if (string.IsNullOrWhiteSpace(processName))
+        var candidateNames = ExtractCandidateNames(process);
+        if (candidateNames.Count == 0)
         {
             return false;
         }
 
         lock (_syncLock)
         {
-            if (_dynamicallyExcludedExactNames.Contains(processName))
+            for (var i = 0; i < candidateNames.Count; i++)
+            {
+                if (_dynamicallyExcludedExactNames.Contains(candidateNames[i]))
+                {
+                    return true;
+                }
+            }
+        }
+
+        for (var i = 0; i < candidateNames.Count; i++)
+        {
+            if (MatchesNameRules(candidateNames[i]))
             {
                 return true;
             }
         }
 
-        return MatchesNameRules(processName);
+        return false;
+    }
+
+    private static List<string> ExtractCandidateNames(ProcessMetadata process)
+    {
+        var list = new List<string>(6);
+
+        AddCandidateIfValid(list, process.ProcessName);
+
+        if (!string.IsNullOrWhiteSpace(process.TargetExecutable))
+        {
+            var rawTarget = process.TargetExecutable.Trim().Trim('"', '\'');
+            AddCandidateIfValid(list, rawTarget);
+
+            if (rawTarget.Contains('/') || rawTarget.Contains('\\'))
+            {
+                var targetFile = Path.GetFileName(rawTarget);
+                AddCandidateIfValid(list, targetFile);
+
+                var targetBase = Path.GetFileNameWithoutExtension(rawTarget);
+                AddCandidateIfValid(list, targetBase);
+            }
+            else
+            {
+                var targetBase = Path.GetFileNameWithoutExtension(rawTarget);
+                AddCandidateIfValid(list, targetBase);
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(process.ExecutablePath))
+        {
+            var exeFile = Path.GetFileName(process.ExecutablePath);
+            AddCandidateIfValid(list, exeFile);
+
+            var exeBase = Path.GetFileNameWithoutExtension(process.ExecutablePath);
+            AddCandidateIfValid(list, exeBase);
+        }
+
+        return list;
+    }
+
+    private static void AddCandidateIfValid(List<string> list, string? candidate)
+    {
+        if (!string.IsNullOrWhiteSpace(candidate) && !list.Contains(candidate, StringComparer.OrdinalIgnoreCase))
+        {
+            list.Add(candidate);
+        }
     }
 
     private static bool IsSystemAccount(string userName)
