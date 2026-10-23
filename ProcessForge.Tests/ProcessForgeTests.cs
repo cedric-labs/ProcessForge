@@ -32,4 +32,36 @@ public sealed class ProcessForgeTests
         // Act & Assert
         filter.ShouldExclude(proc).Should().BeTrue();
     }
+
+    [Fact]
+    public void ExcludeExactName_WhenCalled_DynamicallyExcludesProcess()
+    {
+        // Arrange
+        var filter = new ProcessExclusionFilter(new ProcessExclusionOptions());
+        var proc = new ProcessMetadata(1234, "curl", "/usr/bin/curl", "", "", "user");
+
+        filter.ShouldExclude(proc).Should().BeFalse();
+
+        // Act
+        filter.ExcludeExactName("curl");
+
+        // Assert
+        filter.ShouldExclude(proc).Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void ExcludeExactName_WhenNameIsNullOrWhiteSpace_ThrowsArgumentException(string? invalidName)
+    {
+        // Arrange
+        var filter = new ProcessExclusionFilter(new ProcessExclusionOptions());
+
+        // Act
+        var act = () => filter.ExcludeExactName(invalidName!);
+
+        // Assert
+        act.Should().Throw<ArgumentException>();
+    }
 }

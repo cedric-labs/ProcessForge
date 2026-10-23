@@ -3,11 +3,26 @@ using ProcessForge.Models;
 namespace ProcessForge.Filtering;
 
 /// <summary>
-/// Évaluateur de filtrage et d'exclusion de processus basé sur des règles paramétrables.
+/// Évaluateur de filtrage et d'exclusion de processus basé sur des règles paramétrables et des ajouts dynamiques thread-safe.
 /// </summary>
 public sealed class ProcessExclusionFilter(ProcessExclusionOptions options)
 {
     private readonly ProcessExclusionOptions _options = options ?? throw new ArgumentNullException(nameof(options));
+    private readonly HashSet<string> _dynamicallyExcludedExactNames = new(StringComparer.OrdinalIgnoreCase);
+    private readonly object _syncLock = new();
+
+    /// <summary>
+    /// Ajoute dynamiquement un nom exact de processus à exclure au cours de l'exécution.
+    /// </summary>
+    /// <param name="processName">Nom exact du processus à exclure.</param>
+    public void ExcludeExactName(string processName)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(processName);
+        lock (_syncLock)
+        {
+            _dynamicallyExcludedExactNames.Add(processName.Trim());
+        }
+    }
 
     /// <summary>
     /// Détermine si un processus répond aux critères d'exclusion.
@@ -32,6 +47,14 @@ public sealed class ProcessExclusionFilter(ProcessExclusionOptions options)
         if (string.IsNullOrWhiteSpace(processName))
         {
             return false;
+        }
+
+        lock (_syncLock)
+        {
+            if (_dynamicallyExcludedExactNames.Contains(processName))
+            {
+                return true;
+            }
         }
 
         return MatchesNameRules(processName);
