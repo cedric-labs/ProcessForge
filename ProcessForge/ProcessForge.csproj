@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>ProcessForge</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>curvecoder</Authors>
     <Company>curvecoder</Company>
     <Description>Cross-platform process inspector, command-line wrapper analyzer, and exclusion rule evaluator.</Description>
