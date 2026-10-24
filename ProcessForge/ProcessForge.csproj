@@ -9,7 +9,7 @@
     <Authors>curvecoder</Authors>
     <Company>curvecoder</Company>
     <Description>Cross-platform process inspector, command-line wrapper analyzer, and exclusion rule evaluator.</Description>
-    <RepositoryUrl>https://github.com/curvecoder/NetFlowAudit</RepositoryUrl>
+    <RepositoryUrl>https://github.com/curvecoder/ProcessForge</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
