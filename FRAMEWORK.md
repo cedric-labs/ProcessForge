@@ -1,10 +1,33 @@
-# ProcessForge
+<p align="right">
+  <b>English</b> | <a href="FRAMEWORK.fr.md">Français</a>
+</p>
 
-Framework partagé .NET d'inspection système, d'analyse de métadonnées de processus et de résolution fine des cibles d'exécution réelles (wrappers Java, scripts CMD, PowerShell, Bash, Python).
+# ProcessForge — Framework Specification & AI Documentation
 
-## 🚀 Capacités Clés
+This document is the technical manifest intended for AI agents and software engineers. It outlines all capabilities, architectural components, and public contracts exposed by **ProcessForge**.
 
-* **Inspection multiplateforme** : Résolution du chemin absolu de l'exécutable, ligne de commande (`/proc/<pid>/cmdline` ou Win32), et compte d'exécution.
-* **Résolution de wrappers** : Extraction de la cible applicative sous-jacente (ex: fichier `.jar` exécuté via `java -jar`, scripts `.bat`/`.cmd`/`.ps1`/`.sh` sous les interpréteurs d'ordres).
-* **Filtrage multicritère** : Moteur d'évaluation (`ProcessExclusionFilter`) par PID, nom exact, préfixe, suffixe, sous-chaîne (`Contains`) et filtrage des comptes système (`SYSTEM`, `NT AUTHORITY`, `root`), avec prise en compte transparente du nom de processus, du fichier exécutable et de la cible réelle (`TargetExecutable`).
-* **Exclusion dynamique thread-safe** : Méthode `ExcludeExactName(string processName)` permettant d'ajouter des exclusions de processus ou de cibles à chaud au cours de l'exécution sans recréer le filtre.
+---
+
+## 🎯 Scope & Responsibility
+
+ProcessForge is a cross-platform .NET system engineering library dedicated to **process inspection, execution metadata analysis, and fine-grained resolution of underlying execution targets** (Java wrappers, script interpreters including CMD, PowerShell, Bash, and Python).
+
+---
+
+## 🚀 Key Capabilities
+
+* **Cross-Platform Inspection**: Resolution of executable absolute paths, complete command lines (`/proc/<pid>/cmdline` on Linux, Win32 APIs on Windows), and execution accounts/usernames.
+* **Wrapper Resolution**: Extracts underlying application targets (e.g., `.jar` archives executed via `java -jar`, scripts such as `.bat`/`.cmd`/`.ps1`/`.sh` hosted inside shell interpreters).
+* **Multi-Criteria Filtering**: Evaluation engine (`ProcessExclusionFilter`) matching by PID, exact name, prefix, suffix, substring (`Contains`), and system execution accounts (`SYSTEM`, `NT AUTHORITY`, `root`), seamlessly considering process name, executable path, and underlying target (`TargetExecutable`).
+* **Thread-Safe Dynamic Exclusion**: Method `ExcludeExactName(string processName)` allows dynamic runtime additions of process or target exclusions without rebuilding the filter.
+
+---
+
+## 📋 Maintenance Protocol for AI Agents
+
+All enhancements to ProcessForge must comply with:
+1. **Backward Compatibility:** Preserve all existing public contracts. Use overloads or optional parameters.
+2. **Code Cleanliness:** Zero warnings (`<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`), zero pragmas/suppressions.
+3. **Testing Standards:** Test naming convention `TargetMethod_ScenarioOrCondition_ExpectedResult`.
+4. **Documentation:** Update both `FRAMEWORK.md` and `FRAMEWORK.fr.md` immediately upon introducing or modifying capabilities.
+5. **Validation:** Full pass of `./verify.ps1`.
