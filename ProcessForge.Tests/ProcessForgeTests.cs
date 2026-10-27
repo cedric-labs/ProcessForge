@@ -1,4 +1,4 @@
-using FluentAssertions;
+using AwesomeAssertions;
 using ProcessForge.Filtering;
 using ProcessForge.Inspectors;
 using ProcessForge.Models;
