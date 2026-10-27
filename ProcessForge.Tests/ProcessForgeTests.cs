@@ -94,4 +94,229 @@ public sealed class ProcessForgeTests
         // Assert
         filter.ShouldExclude(proc).Should().BeTrue();
     }
+
+    [Fact]
+    public async Task ResolveProcessAsync_WhenCancellationRequested_ThrowsOperationCanceledException()
+    {
+        // Arrange
+        var inspector = new CrossPlatformProcessInspector();
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+
+        // Act
+        var act = () => inspector.ResolveProcessAsync(1, cts.Token);
+
+        // Assert
+        await act.Should().ThrowAsync<OperationCanceledException>();
+    }
+
+    [Fact]
+    public async Task ResolveProcessAsync_WhenProcessIdIsZero_ReturnsSystemIdle()
+    {
+        // Arrange
+        var inspector = new CrossPlatformProcessInspector();
+
+        // Act
+        var result = await inspector.ResolveProcessAsync(0);
+
+        // Assert
+        result.ProcessId.Should().Be(0);
+        result.ProcessName.Should().Be("System Idle");
+        result.UserName.Should().Be("SYSTEM");
+    }
+
+    [Fact]
+    public async Task ResolveProcessAsync_WhenProcessIdIsNegative_ReturnsUnknown()
+    {
+        // Arrange
+        var inspector = new CrossPlatformProcessInspector();
+
+        // Act
+        var result = await inspector.ResolveProcessAsync(-10);
+
+        // Assert
+        result.ProcessId.Should().Be(-10);
+        result.ProcessName.Should().Be("Unknown");
+        result.UserName.Should().Be("SYSTEM");
+    }
+
+    [Fact]
+    public async Task ResolveProcessAsync_WhenProcessIsCurrentProcess_ReturnsValidMetadata()
+    {
+        // Arrange
+        var inspector = new CrossPlatformProcessInspector();
+        var currentPid = Environment.ProcessId;
+
+        // Act
+        var result = await inspector.ResolveProcessAsync(currentPid);
+
+        // Assert
+        result.ProcessId.Should().Be(currentPid);
+        result.ProcessName.Should().NotBeNullOrWhiteSpace();
+        result.ExecutablePath.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public async Task ResolveProcessAsync_WhenProcessDoesNotExist_ReturnsTerminated()
+    {
+        // Arrange
+        var inspector = new CrossPlatformProcessInspector();
+        const int nonExistentPid = 9999999;
+
+        // Act
+        var result = await inspector.ResolveProcessAsync(nonExistentPid);
+
+        // Assert
+        result.ProcessId.Should().Be(nonExistentPid);
+        result.ProcessName.Should().Be("Terminated");
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void ResolveTargetPayload_WhenCommandLineIsNullOrWhiteSpace_ReturnsEmpty(string? cmdLine)
+    {
+        // Act
+        var target = CrossPlatformProcessInspector.ResolveTargetPayload("java", cmdLine!);
+
+        // Assert
+        target.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void ResolveTargetPayload_WhenJavaHasNoJarTarget_ReturnsEmpty()
+    {
+        // Act
+        var target = CrossPlatformProcessInspector.ResolveTargetPayload("java", "java -version");
+
+        // Assert
+        target.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void ResolveTargetPayload_WhenHostIsPwshWithScript_ExtractsTarget()
+    {
+        // Act
+        var target = CrossPlatformProcessInspector.ResolveTargetPayload("pwsh", "pwsh -File /scripts/run.ps1");
+
+        // Assert
+        target.Should().Be("/scripts/run.ps1");
+    }
+
+    [Fact]
+    public void ResolveTargetPayload_WhenHostIsNotScriptHost_ReturnsEmpty()
+    {
+        // Act
+        var target = CrossPlatformProcessInspector.ResolveTargetPayload("notepad", "notepad.exe C:\\temp\\notes.txt");
+
+        // Assert
+        target.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Constructor_WhenOptionsIsNull_ThrowsArgumentNullException()
+    {
+        // Act
+        var act = () => new ProcessExclusionFilter(null!);
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void ShouldExclude_WhenProcessIsNull_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var filter = new ProcessExclusionFilter(new ProcessExclusionOptions());
+
+        // Act
+        var act = () => filter.ShouldExclude(null!);
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Theory]
+    [InlineData("NT AUTHORITY\\SYSTEM", true)]
+    [InlineData("root", true)]
+    [InlineData("SYSTEM", true)]
+    [InlineData("alice", false)]
+    [InlineData(null, false)]
+    public void ShouldExclude_WhenExcludeSystemAccountsConfigured_ReturnsExpectedResult(string? userName, bool expected)
+    {
+        // Arrange
+        var filter = new ProcessExclusionFilter(new ProcessExclusionOptions { ExcludeSystemAccounts = true });
+        var proc = new ProcessMetadata(100, "custom_service", "", "", "", userName ?? string.Empty);
+
+        // Act & Assert
+        filter.ShouldExclude(proc).Should().Be(expected);
+    }
+
+    [Fact]
+    public void ShouldExclude_WhenNameMatchesPrefix_ReturnsTrue()
+    {
+        // Arrange
+        var filter = new ProcessExclusionFilter(new ProcessExclusionOptions
+        {
+            ExcludedNamePrefixes = ["test_"]
+        });
+        var proc = new ProcessMetadata(100, "test_worker", "", "", "", "user");
+
+        // Act & Assert
+        filter.ShouldExclude(proc).Should().Be(true);
+    }
+
+    [Fact]
+    public void ShouldExclude_WhenNameMatchesSuffix_ReturnsTrue()
+    {
+        // Arrange
+        var filter = new ProcessExclusionFilter(new ProcessExclusionOptions
+        {
+            ExcludedNameSuffixes = ["_agent"]
+        });
+        var proc = new ProcessMetadata(100, "worker_agent", "", "", "", "user");
+
+        // Act & Assert
+        filter.ShouldExclude(proc).Should().Be(true);
+    }
+
+    [Fact]
+    public void ShouldExclude_WhenNameMatchesContains_ReturnsTrue()
+    {
+        // Arrange
+        var filter = new ProcessExclusionFilter(new ProcessExclusionOptions
+        {
+            ExcludedNameContains = ["daemon"]
+        });
+        var proc = new ProcessMetadata(100, "my_daemon_process", "", "", "", "user");
+
+        // Act & Assert
+        filter.ShouldExclude(proc).Should().Be(true);
+    }
+
+    [Fact]
+    public void ShouldExclude_WhenExecutablePathMatchesConfiguredExactName_ReturnsTrue()
+    {
+        // Arrange
+        var filter = new ProcessExclusionFilter(new ProcessExclusionOptions
+        {
+            ExcludedExactNames = ["agent.exe"]
+        });
+        var proc = new ProcessMetadata(100, "host", "C:\\tools\\agent.exe", "", "", "user");
+
+        // Act & Assert
+        filter.ShouldExclude(proc).Should().Be(true);
+    }
+
+    [Fact]
+    public void ShouldExclude_WhenNoCandidatesExist_ReturnsFalse()
+    {
+        // Arrange
+        var filter = new ProcessExclusionFilter(new ProcessExclusionOptions());
+        var proc = new ProcessMetadata(100, "", "", "", "", "user");
+
+        // Act & Assert
+        filter.ShouldExclude(proc).Should().Be(false);
+    }
 }
