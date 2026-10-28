@@ -43,7 +43,7 @@ public sealed class CrossPlatformProcessInspector : IProcessInspector
                 ExecutablePath: executablePath,
                 CommandLine: commandLine,
                 TargetExecutable: targetPayload,
-                UserName: string.Empty));
+                UserName: ProcessOwnerResolver.Resolve(processId)));
         }
         catch (ArgumentException)
         {

@@ -16,9 +16,9 @@ ProcessForge est le framework partagé .NET d'**inspection système, d'analyse d
 
 ## 🚀 Capacités Clés
 
-* **Inspection multiplateforme** : Résolution du chemin absolu de l'exécutable, ligne de commande (`/proc/<pid>/cmdline` ou Win32), et compte d'exécution.
+* **Inspection multiplateforme** : Résolution du chemin absolu de l'exécutable, ligne de commande (`/proc/<pid>/cmdline` ou Win32), et compte qui exécute le processus (`UserName`) : jeton d'accès du processus sous Windows (`DOMAINE\compte`, ou le SID quand le compte n'a plus de nom), UID réel de `/proc/<pid>/status` traduit par `/etc/passwd` sous Linux (l'UID numérique quand le compte n'y figure pas). Le compte reste vide quand le processus ne peut pas être ouvert (processus protégé, droits insuffisants).
 * **Résolution de wrappers** : Extraction de la cible applicative sous-jacente (ex: fichier `.jar` exécuté via `java -jar`, scripts `.bat`/`.cmd`/`.ps1`/`.sh` sous les interpréteurs d'ordres).
-* **Filtrage multicritère** : Moteur d'évaluation (`ProcessExclusionFilter`) par PID, nom exact, préfixe, suffixe, sous-chaîne (`Contains`) et filtrage des comptes système (`SYSTEM`, `NT AUTHORITY`, `root`), avec prise en compte transparente du nom de processus, du fichier exécutable et de la cible réelle (`TargetExecutable`).
+* **Filtrage multicritère** : Moteur d'évaluation (`ProcessExclusionFilter`) par PID, nom exact, préfixe, suffixe, sous-chaîne (`Contains`) et filtrage des comptes système (`SYSTEM`, `NT AUTHORITY`, `root`), en tenant compte du nom de processus, du fichier exécutable et de la cible réelle (`TargetExecutable`).
 * **Exclusion dynamique thread-safe** : Méthode `ExcludeExactName(string processName)` permettant d'ajouter des exclusions de processus ou de cibles à chaud au cours de l'exécution sans recréer le filtre.
 
 ---

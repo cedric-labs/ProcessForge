@@ -16,9 +16,9 @@ ProcessForge is a cross-platform .NET system engineering library dedicated to **
 
 ## 🚀 Key Capabilities
 
-* **Cross-Platform Inspection**: Resolution of executable absolute paths, complete command lines (`/proc/<pid>/cmdline` on Linux, Win32 APIs on Windows), and execution accounts/usernames.
+* **Cross-Platform Inspection**: Resolution of executable absolute paths, complete command lines (`/proc/<pid>/cmdline` on Linux, Win32 APIs on Windows), and the account running the process (`UserName`): the access token of the process on Windows (`DOMAIN\account`, the SID when the account no longer has a name), the real UID of `/proc/<pid>/status` translated with `/etc/passwd` on Linux (the numeric UID when the account is not listed). The account stays empty when the process cannot be opened (protected process, insufficient rights).
 * **Wrapper Resolution**: Extracts underlying application targets (e.g., `.jar` archives executed via `java -jar`, scripts such as `.bat`/`.cmd`/`.ps1`/`.sh` hosted inside shell interpreters).
-* **Multi-Criteria Filtering**: Evaluation engine (`ProcessExclusionFilter`) matching by PID, exact name, prefix, suffix, substring (`Contains`), and system execution accounts (`SYSTEM`, `NT AUTHORITY`, `root`), seamlessly considering process name, executable path, and underlying target (`TargetExecutable`).
+* **Multi-Criteria Filtering**: Evaluation engine (`ProcessExclusionFilter`) matching by PID, exact name, prefix, suffix, substring (`Contains`), and system execution accounts (`SYSTEM`, `NT AUTHORITY`, `root`), considering process name, executable path, and underlying target (`TargetExecutable`).
 * **Thread-Safe Dynamic Exclusion**: Method `ExcludeExactName(string processName)` allows dynamic runtime additions of process or target exclusions without rebuilding the filter.
 
 ---
