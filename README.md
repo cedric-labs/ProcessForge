@@ -29,7 +29,7 @@ Cross-platform .NET process inspection framework for extracting command-line met
 Add the package via the .NET CLI:
 
 ```powershell
-dotnet add package ProcessForge --version 1.1.1
+dotnet add package ProcessForge --version 1.1.2
 ```
 
 ---
