@@ -1,14 +1,14 @@
 namespace ProcessForge.Models;
 
 /// <summary>
-/// Métadonnées détaillées d'un processus exécutable résolu par le système.
+/// Detailed metadata of an executable process resolved by the system.
 /// </summary>
-/// <param name="ProcessId">Identifiant unique du processus (PID).</param>
-/// <param name="ProcessName">Nom court du processus.</param>
-/// <param name="ExecutablePath">Chemin d'accès absolu complet au binaire exécutable.</param>
-/// <param name="CommandLine">Ligne de commande complète de lancement.</param>
-/// <param name="TargetExecutable">Cible réelle détectée (ex: fichier JAR, script .bat, .cmd, .ps1, .sh).</param>
-/// <param name="UserName">Compte d'exécution du processus.</param>
+/// <param name="ProcessId">Unique process identifier (PID).</param>
+/// <param name="ProcessName">Short process name.</param>
+/// <param name="ExecutablePath">Full absolute path of the executable binary.</param>
+/// <param name="CommandLine">Full launch command line.</param>
+/// <param name="TargetExecutable">Actual target detected (for example a JAR file or a .bat, .cmd, .ps1 or .sh script).</param>
+/// <param name="UserName">Account the process runs under.</param>
 public sealed record ProcessMetadata(
     int ProcessId,
     string ProcessName,

@@ -6,7 +6,7 @@ using ProcessForge.Models;
 namespace ProcessForge.Inspectors;
 
 /// <summary>
-/// Inspecteur multiplateforme extrayant les métadonnées de processus et résolvant les cibles réelles (Java, scripts, etc.).
+/// Cross-platform inspector that reads process metadata and resolves the actual targets (Java, scripts, and so on).
 /// </summary>
 public sealed class CrossPlatformProcessInspector : IProcessInspector
 {
@@ -69,7 +69,7 @@ public sealed class CrossPlatformProcessInspector : IProcessInspector
         }
         catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
         {
-            // Droits insuffisants ou processus terminé
+            // Insufficient rights or process already exited
         }
 
         return string.Empty;
@@ -89,7 +89,7 @@ public sealed class CrossPlatformProcessInspector : IProcessInspector
                 }
                 catch (IOException)
                 {
-                    // Erreur lecture I/O
+                    // I/O read error
                 }
             }
         }
@@ -98,7 +98,7 @@ public sealed class CrossPlatformProcessInspector : IProcessInspector
     }
 
     /// <summary>
-    /// Résout la cible applicative réelle à partir du nom d'hôte de script ou machine virtuelle et de la ligne de commande.
+    /// Resolves the actual application target from the script host or virtual machine name and the command line.
     /// </summary>
     public static string ResolveTargetPayload(string processName, string commandLine)
     {

@@ -1,37 +1,37 @@
 namespace ProcessForge.Filtering;
 
 /// <summary>
-/// Options paramétrables pour le filtrage et l'exclusion de processus.
+/// Configurable options for process filtering and exclusion.
 /// </summary>
 public sealed record ProcessExclusionOptions
 {
     /// <summary>
-    /// Identifiants de processus (PID) à exclure.
+    /// Process identifiers (PIDs) to exclude.
     /// </summary>
     public IReadOnlyList<int> ExcludedProcessIds { get; init; } = [0, 4];
 
     /// <summary>
-    /// Noms exacts de processus à exclure.
+    /// Exact process names to exclude.
     /// </summary>
     public IReadOnlyList<string> ExcludedExactNames { get; init; } = ["System", "Idle"];
 
     /// <summary>
-    /// Préfixes de noms à exclure.
+    /// Name prefixes to exclude.
     /// </summary>
     public IReadOnlyList<string> ExcludedNamePrefixes { get; init; } = [];
 
     /// <summary>
-    /// Suffixes de noms à exclure.
+    /// Name suffixes to exclude.
     /// </summary>
     public IReadOnlyList<string> ExcludedNameSuffixes { get; init; } = [];
 
     /// <summary>
-    /// Segments de noms à exclure.
+    /// Name fragments to exclude.
     /// </summary>
     public IReadOnlyList<string> ExcludedNameContains { get; init; } = [];
 
     /// <summary>
-    /// Indique si les comptes systèmes (NT AUTHORITY, SYSTEM, root) doivent être exclus.
+    /// Indicates whether system accounts (NT AUTHORITY, SYSTEM, root) are excluded.
     /// </summary>
     public bool ExcludeSystemAccounts { get; init; } = true;
 }

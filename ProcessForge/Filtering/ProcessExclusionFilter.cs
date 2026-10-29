@@ -3,7 +3,7 @@ using ProcessForge.Models;
 namespace ProcessForge.Filtering;
 
 /// <summary>
-/// Évaluateur de filtrage et d'exclusion de processus basé sur des règles paramétrables et des ajouts dynamiques thread-safe.
+/// Decides which processes are excluded, from configurable rules and thread-safe additions made at run time.
 /// </summary>
 public sealed class ProcessExclusionFilter(ProcessExclusionOptions options)
 {
@@ -12,9 +12,9 @@ public sealed class ProcessExclusionFilter(ProcessExclusionOptions options)
     private readonly object _syncLock = new();
 
     /// <summary>
-    /// Ajoute dynamiquement un nom exact de processus ou de cible exécutable à exclure au cours de l'exécution.
+    /// Adds, at run time, an exact process or target executable name to exclude.
     /// </summary>
-    /// <param name="processName">Nom exact du processus ou de la cible à exclure.</param>
+    /// <param name="processName">Exact name of the process or target to exclude.</param>
     public void ExcludeExactName(string processName)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(processName);
@@ -25,10 +25,10 @@ public sealed class ProcessExclusionFilter(ProcessExclusionOptions options)
     }
 
     /// <summary>
-    /// Détermine si un processus répond aux critères d'exclusion (par PID, compte système, nom de processus ou exécutable cible).
+    /// Determines whether a process matches the exclusion criteria (PID, system account, process name or target executable).
     /// </summary>
-    /// <param name="process">Métadonnées du processus.</param>
-    /// <returns>True si le processus doit être exclu, False sinon.</returns>
+    /// <param name="process">Process metadata.</param>
+    /// <returns>True when the process must be excluded; otherwise false.</returns>
     public bool ShouldExclude(ProcessMetadata process)
     {
         ArgumentNullException.ThrowIfNull(process);

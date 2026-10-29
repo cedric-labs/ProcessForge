@@ -7,8 +7,8 @@ using Microsoft.Win32.SafeHandles;
 namespace ProcessForge.Inspectors;
 
 /// <summary>
-/// Résout le compte propriétaire d'un processus : jeton d'accès sous Windows (<c>DOMAINE\compte</c>),
-/// UID réel de <c>/proc/&lt;pid&gt;/status</c> traduit par <c>/etc/passwd</c> sous Linux.
+/// Resolves the account that owns a process: access token on Windows (<c>DOMAIN\account</c>),
+/// real UID from <c>/proc/&lt;pid&gt;/status</c> translated through <c>/etc/passwd</c> on Linux.
 /// </summary>
 internal static partial class ProcessOwnerResolver
 {
@@ -18,7 +18,7 @@ internal static partial class ProcessOwnerResolver
     private const string UidField = "Uid:";
 
     /// <summary>
-    /// Renvoie le compte du processus, ou une chaîne vide quand il ne peut pas être lu.
+    /// Returns the process account, or an empty string when it cannot be read.
     /// </summary>
     public static string Resolve(int processId)
     {
@@ -31,7 +31,7 @@ internal static partial class ProcessOwnerResolver
     }
 
     /// <summary>
-    /// Extrait l'UID réel (premier champ de la ligne <c>Uid:</c>) du contenu de <c>/proc/&lt;pid&gt;/status</c>.
+    /// Extracts the real UID (first field of the <c>Uid:</c> line) from the content of <c>/proc/&lt;pid&gt;/status</c>.
     /// </summary>
     public static int? ParseRealUserId(string statusContent)
     {
@@ -52,8 +52,8 @@ internal static partial class ProcessOwnerResolver
     }
 
     /// <summary>
-    /// Cherche le nom du compte d'un UID dans le contenu de <c>/etc/passwd</c> ; renvoie l'UID en texte s'il n'y figure pas
-    /// (comptes d'annuaire LDAP ou de conteneur absents du fichier local).
+    /// Looks up the account name of a UID in the content of <c>/etc/passwd</c>; returns the UID as text when it is not listed
+    /// (LDAP directory or container accounts missing from the local file).
     /// </summary>
     public static string FindUserName(string passwdContent, int userId)
     {
